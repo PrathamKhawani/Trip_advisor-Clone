@@ -1,27 +1,36 @@
 # ✈️ TripAdvisor Clone
 
-A modern, fully-functional travel destination review application built with **AngularJS** and **Firebase**. Browse, add, edit, delete, rate, and review travel destinations — all with a sleek glassmorphism UI.
+A modern, fully-functional travel destination review application built with **AngularJS** and **Firebase**. Browse, add, edit, delete, rate, and review travel destinations — all with a sleek glassmorphism UI that works on any device.
 
 ---
 
 ## 🌍 Live Demo
 
-🔗 **[Coming Soon — Deploying to Vercel](#)**
+🔗 **[https://trip-advisor-clone-psi.vercel.app](https://trip-advisor-clone-psi.vercel.app)**
 
 ---
 
-## 📸 Features
+## 📸 Screenshots
 
-- 🔐 **Google Authentication** — Secure sign-in with Firebase Auth
-- 📋 **Listings Page** — Browse beautiful destination cards with images
-- ➕ **Add Destinations** — Add new travel destinations with images
-- ✏️ **Edit Destinations** — Modify existing destination details
-- 🗑️ **Delete Destinations** — Remove destinations permanently
-- ⭐ **Star Ratings** — Rate destinations from 1–5 stars
-- 💬 **Reviews** — Leave written reviews on destinations
-- 💾 **Persistent Storage** — All data saved to browser localStorage (works without Firebase rules)
-- 📱 **Responsive Design** — Works beautifully on all screen sizes
-- 🎨 **Glassmorphism UI** — Modern, premium design with blur effects and smooth animations
+> Sign in with your Google account to unlock full features.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🔐 **Google Authentication** | Secure sign-in with Firebase Auth |
+| 📋 **Browse Destinations** | Beautiful card grid with images, ratings & reviews |
+| ➕ **Add Destinations** | Add new travel spots with name, description & image URL |
+| ✏️ **Edit Destinations** | Modify any destination's details inline |
+| 🗑️ **Delete Destinations** | Permanently remove destinations |
+| ⭐ **Star Ratings** | Rate any destination from 1–5 stars |
+| 💬 **Reviews** | Leave written reviews on any destination |
+| 💾 **Firebase Realtime DB** | All data persists permanently across all browsers & devices |
+| ⚡ **localStorage Cache** | Instant load from local cache while Firebase syncs in background |
+| 📱 **Fully Responsive** | Works beautifully on desktop, tablet, and mobile |
+| 🎨 **Glassmorphism UI** | Modern premium design with blur effects, Inter font & animations |
 
 ---
 
@@ -29,20 +38,21 @@ A modern, fully-functional travel destination review application built with **An
 
 | Technology | Purpose |
 |---|---|
-| **AngularJS 1.8.2** | Frontend SPA Framework |
+| **AngularJS 1.8.2** | Frontend Single Page Application |
 | **Firebase Auth v8** | Google Sign-In Authentication |
-| **Firebase Realtime DB v8** | Cloud data backup |
-| **localStorage** | Primary persistent data storage |
-| **CSS (Custom)** | Glassmorphism styling, animations |
-| **Google Fonts (Inter)** | Typography |
+| **Firebase Realtime DB v8** | Permanent cloud database (primary storage) |
+| **localStorage** | Fast offline cache for instant UI loads |
+| **CSS (Custom)** | Glassmorphism, animations, responsive grid |
+| **Google Fonts — Inter** | Modern premium typography |
+| **Vercel** | Hosting & auto-deployment |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started Locally
 
 ### Prerequisites
 - A modern web browser
-- A local web server (e.g., VS Code Live Server extension)
+- VS Code with the **Live Server** extension (or any local HTTP server)
 
 ### Run Locally
 
@@ -54,22 +64,26 @@ A modern, fully-functional travel destination review application built with **An
 
 2. **Open the app**
    - Navigate to `trip-advisor/frontend/`
-   - Open `index.html` with **Live Server** (VS Code extension) or any local HTTP server
+   - Right-click `index.html` → **Open with Live Server**
 
 3. **Sign In**
-   - Click the **Sign In with Google** button
+   - Click **Sign In with Google**
    - You'll be redirected to the listings page
 
 ---
 
 ## 🔥 Firebase Setup
 
-The app uses Firebase for Google Authentication and as a cloud backup for data.
+### Authentication
+1. Go to [Firebase Console](https://console.firebase.google.com/) → Project **`trip-advisor-9bfab`**
+2. Go to **Authentication → Sign-in method**
+3. Make sure **Google** is enabled
+4. Under **Authorized domains**, add:
+   - `localhost`
+   - `trip-advisor-clone-psi.vercel.app`
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select the project: **trip-advisor-9bfab**
-3. Enable **Google Sign-In** under Authentication → Sign-in methods
-4. Set **Realtime Database Rules** to allow authenticated writes:
+### Realtime Database Rules
+Set your rules to allow authenticated users to write:
 
 ```json
 {
@@ -80,6 +94,8 @@ The app uses Firebase for Google Authentication and as a cloud backup for data.
 }
 ```
 
+> ⚠️ Without these rules, add/edit/delete operations will only save locally in your browser.
+
 ---
 
 ## 📁 Project Structure
@@ -88,25 +104,59 @@ The app uses Firebase for Google Authentication and as a cloud backup for data.
 Trip_advisor-Clone/
 ├── trip-advisor/
 │   └── frontend/
-│       ├── index.html      # Main HTML file (styles + structure)
-│       └── app.js          # AngularJS app (routes, controllers, logic)
+│       ├── index.html          # Main HTML — layout, styles, navigation
+│       └── app.js              # AngularJS app — routes, controllers, all logic
+├── vercel.json                 # Vercel deployment configuration
 └── README.md
 ```
 
 ---
 
-## ✨ How It Works
+## ⚙️ How It Works
 
-- **On first load**, the app seeds 3 default destinations (Eiffel Tower, Colosseum, Santorini) into your browser's `localStorage`.
-- **All CRUD operations** (add, edit, delete, rate, review) are saved to `localStorage` instantly — no Firebase rules needed.
-- **Firebase** is used silently as a cloud backup when write permissions allow it.
-- **Deleting** a destination removes it permanently from localStorage — it will never reappear.
+### Data Flow
+```
+User Action
+    ↓
+Instant UI Update (Optimistic)
+    ↓
+localStorage Cache Updated (instant persistence in this browser)
+    ↓
+Firebase Realtime DB Updated (permanent persistence across all browsers/devices)
+```
+
+### On First Load
+- App checks **localStorage** for a cached list → shows instantly
+- Simultaneously fetches live data from **Firebase**
+- If Firebase has data → syncs it to UI and cache
+- If Firebase is empty → seeds the 3 default destinations into Firebase
+
+### Default Destinations
+| # | Destination | Rating |
+|---|---|---|
+| 1 | 🗼 Eiffel Tower, Paris | ⭐⭐⭐⭐⭐ |
+| 2 | 🏟️ Colosseum, Rome | ⭐⭐⭐⭐ |
+| 3 | 🌊 Santorini, Greece | ⭐⭐⭐⭐⭐ |
+
+---
+
+## 🚢 Deployment
+
+This project is deployed on **Vercel** with automatic deployments connected to this GitHub repository.
+
+Every `git push` to `main` triggers a new deployment automatically.
+
+To deploy manually:
+```bash
+npm install -g vercel
+vercel deploy --prod
+```
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+Pull requests are welcome! For major changes, please open an issue first.
 
 ---
 
@@ -116,4 +166,9 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-<p align="center">Made with ❤️ by <a href="https://github.com/PrathamKhawani">Pratham Khawani</a></p>
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/PrathamKhawani">Pratham Khawani</a>
+  <br><br>
+  <a href="https://trip-advisor-clone-psi.vercel.app">🌐 Live Demo</a> •
+  <a href="https://github.com/PrathamKhawani/Trip_advisor-Clone">📦 Repository</a>
+</p>
