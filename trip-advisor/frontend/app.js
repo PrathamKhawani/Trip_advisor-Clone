@@ -38,10 +38,10 @@ app.config(function($routeProvider) {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                         <h2 style="margin: 0; font-size: 2rem; color: #0f172a;">Top Destinations</h2>
                     </div>
-                    <button class="add-btn" ng-click="showAddModal=true" title="Add Destination" ng-if="user">+</button>
+                    <button class="add-btn" ng-click="openAddModal()" title="Add Destination" ng-if="user" style="z-index: 9999;">+</button>
                     <div ng-show="showAddModal" class="modal-bg">
                         <div class="modal" style="position:relative;">
-                            <span class="close-modal" ng-click="showAddModal=false">&times;</span>
+                            <span class="close-modal" ng-click="closeAddModal()">&times;</span>
                             <h2>Add Destination</h2>
                             <form ng-submit="addLocation()">
                                 <input type="text" ng-model="newLocation.name" placeholder="Destination Name" required>
@@ -149,18 +149,25 @@ app.controller('ListingsController', function($scope, $timeout) {
     $scope.newLocation = {};
     $scope.showAddModal = false;
 
+    $scope.openAddModal = function() {
+        $scope.showAddModal = true;
+    };
+    $scope.closeAddModal = function() {
+        $scope.showAddModal = false;
+    };
+
     function loadLocations() {
         const defaultListings = [
-            { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://upload.wikimedia.org/wikipedia/commons/b/b3/El_Deir_Petra_Jordan.jpg", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
-            { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://upload.wikimedia.org/wikipedia/commons/2/23/The_Great_Wall_of_China_at_Jinshanling-edit.jpg", rating: 4, reviews: ["A breathtaking architectural marvel."] },
-            { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Serengeti_wildebeest_migration.jpg", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
-            { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Galapagos_giant_tortoise_Geochelone_elephantopus.jpg", rating: 5, reviews: ["Nature at its finest."] },
-            { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Canal_Grande_Chiesa_della_Salute_e_Dogana_dal_ponte_dell_Accademia.jpg", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
-            { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://upload.wikimedia.org/wikipedia/commons/1/1b/080103_huji_yama_at_matsuda_gotenba_01.jpg", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
-            { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Victoria_Falls_2.jpg", rating: 5, reviews: ["The sheer power of the water is humbling."] },
-            { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Grand_Canyon_from_Mather_Point.jpg", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
-            { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://upload.wikimedia.org/wikipedia/commons/c/c8/Taj_Mahal_in_March_2004.jpg", rating: 5, reviews: ["A stunning monument of love."] },
-            { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Bora_Bora_Mount_Otemanu.jpg", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
+            { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
+            { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["A breathtaking architectural marvel."] },
+            { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
+            { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://images.unsplash.com/photo-1580826978418-490baf754b23?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Nature at its finest."] },
+            { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
+            { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
+            { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://images.unsplash.com/photo-1606563605510-4c3e803fb28b?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sheer power of the water is humbling."] },
+            { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
+            { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://images.unsplash.com/photo-1564507592228-00d8b4e760c4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A stunning monument of love."] },
+            { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://images.unsplash.com/photo-1533614767277-bfddde5bd9b4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
         ];
 
         firebase.database().ref('listings').once('value').then(function(snapshot) {
