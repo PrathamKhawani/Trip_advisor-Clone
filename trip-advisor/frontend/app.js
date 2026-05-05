@@ -173,26 +173,25 @@ app.controller('ListingsController', function($scope, $rootScope) {
         { id: 'def_2', name: "Santorini", description: "Stunning white-washed buildings overlooking the turquoise Aegean Sea.", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The best sunset ever."] }
     ];
 
-    function getAllListings() {
-        const stored = localStorage.getItem(LS_KEY);
-        if (stored !== null) return JSON.parse(stored);
-        saveAllListings(defaultListings);
-        return JSON.parse(JSON.stringify(defaultListings));
+    // --- localStorage cache helpers ---
+    function getCached() {
+        const s = localStorage.getItem(LS_KEY);
+        return s ? JSON.parse(s) : null;
     }
-
-    function saveAllListings(list) {
+    function setCache(list) {
         localStorage.setItem(LS_KEY, JSON.stringify(list));
     }
 
+    // --- State ---
     $scope.locations       = [];
     $scope.newLocation     = {};
     $scope.editingLocation = {};
     $scope.showAddModal    = false;
     $scope.showEditModal   = false;
+    $scope.dbError         = false; // true if Firebase rules are blocking writes
 
     $scope.openAddModal  = function() { $scope.showAddModal  = true; };
     $scope.closeAddModal = function() { $scope.showAddModal  = false; };
-
     $scope.openEditModal = function(location) {
         $scope.editingLocation  = angular.copy(location);
         $scope.originalLocation = location;
@@ -203,83 +202,170 @@ app.controller('ListingsController', function($scope, $rootScope) {
         $scope.editingLocation = {};
     };
 
-    // Load from localStorage
-    $scope.locations = getAllListings();
+    // --- LOAD ---
+    // Show cached data immediately for fast UI, then sync from Firebase
+    function loadLocations() {
+        const cached = getCached();
+        if (cached && cached.length > 0) {
+            $scope.locations = cached;
+            $scope.$applyAsync();
+        }
 
-    // Add
+        // Now fetch live data from Firebase
+        firebase.database().ref('listings').once('value').then(function(snapshot) {
+            const data = snapshot.val();
+
+            if (!data || Object.keys(data).length === 0) {
+                // Firebase is empty — seed defaults and save to Firebase
+                if ($rootScope.user) {
+                    const promises = defaultListings.map(item => {
+                        return firebase.database().ref('listings').push({
+                            name: item.name,
+                            description: item.description,
+                            image: item.image,
+                            rating: item.rating,
+                            reviews: item.reviews
+                        }).then(ref => ({ id: ref.key, ...item }));
+                    });
+                    Promise.all(promises).then(seeded => {
+                        setCache(seeded);
+                        $scope.locations = seeded;
+                        $scope.$applyAsync();
+                    });
+                } else {
+                    // Not logged in — show defaults from localStorage or hardcoded
+                    const fallback = cached || defaultListings;
+                    setCache(fallback);
+                    $scope.locations = fallback;
+                    $scope.$applyAsync();
+                }
+            } else {
+                // Firebase has data — use it as source of truth
+                const list = Object.keys(data).map(key => ({
+                    id: key,
+                    name: data[key].name,
+                    description: data[key].description,
+                    image: data[key].image,
+                    rating: data[key].rating || 0,
+                    reviews: data[key].reviews || []
+                }));
+                setCache(list);
+                $scope.locations = list;
+                $scope.$applyAsync();
+            }
+        }).catch(function(err) {
+            console.error("Firebase read error:", err.message);
+            // Fallback to cache or defaults
+            $scope.locations = getCached() || defaultListings;
+            $scope.$applyAsync();
+        });
+    }
+    loadLocations();
+
+    // --- ADD ---
     $scope.addLocation = function() {
         if (!$scope.newLocation.name || !$scope.newLocation.description) return;
+
         const newObj = {
-            id:          'local_' + Date.now(),
             name:        $scope.newLocation.name,
             description: $scope.newLocation.description,
             image:       $scope.newLocation.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80',
             rating:      0,
             reviews:     []
         };
-        const list = getAllListings();
-        list.push(newObj);
-        saveAllListings(list);
-        $scope.locations    = list;
+
+        // Optimistic UI update
+        const tempId  = 'temp_' + Date.now();
+        const tempObj = { id: tempId, ...newObj };
+        $scope.locations.push(tempObj);
+        setCache($scope.locations);
         $scope.showAddModal = false;
         $scope.newLocation  = {};
 
-        firebase.database().ref('listings').push({
-            name: newObj.name, description: newObj.description,
-            image: newObj.image, rating: newObj.rating, reviews: newObj.reviews
-        }).catch(e => console.warn("Firebase backup failed. Data saved in browser storage."));
+        // Save to Firebase (permanent)
+        firebase.database().ref('listings').push(newObj).then(function(ref) {
+            // Replace temp ID with real Firebase ID
+            const list = getCached();
+            const idx  = list.findIndex(l => l.id === tempId);
+            if (idx > -1) {
+                list[idx].id = ref.key;
+                setCache(list);
+                $scope.locations = list;
+                $scope.$applyAsync();
+            }
+        }).catch(function(err) {
+            console.error("Firebase write blocked:", err.message);
+            $scope.dbError = true;
+            $scope.$applyAsync();
+            alert("⚠️ Firebase rules are blocking saves!\n\nGo to Firebase Console → Realtime Database → Rules and set:\n\n{\n  \"rules\": {\n    \".read\": true,\n    \".write\": \"auth != null\"\n  }\n}\n\nYour data is saved locally until then.");
+        });
     };
 
-    // Edit
+    // --- EDIT ---
     $scope.saveEdit = function() {
-        const list = getAllListings();
-        const idx  = list.findIndex(l => l.id === $scope.editingLocation.id);
+        const id = $scope.editingLocation.id;
+        const updated = {
+            name:        $scope.editingLocation.name,
+            description: $scope.editingLocation.description,
+            image:       $scope.editingLocation.image || $scope.originalLocation.image
+        };
+
+        // Update UI and cache immediately
+        const list = getCached();
+        const idx  = list.findIndex(l => l.id === id);
         if (idx > -1) {
-            list[idx] = Object.assign({}, list[idx], {
-                name:        $scope.editingLocation.name,
-                description: $scope.editingLocation.description,
-                image:       $scope.editingLocation.image || list[idx].image
-            });
-            saveAllListings(list);
+            list[idx] = Object.assign({}, list[idx], updated);
+            setCache(list);
             $scope.locations = list;
         }
         $scope.showEditModal = false;
+
+        // Save to Firebase
+        firebase.database().ref('listings/' + id).update(updated)
+            .catch(e => console.warn("Firebase edit blocked. Saved in local cache."));
     };
 
-    // Delete
+    // --- DELETE ---
     $scope.deleteLocation = function(location) {
         if (!confirm("Are you sure you want to delete this destination?")) return;
-        let list = getAllListings();
+
+        // Remove from UI and cache immediately
+        let list = getCached();
         list = list.filter(l => l.id !== location.id);
-        saveAllListings(list);
+        setCache(list);
         $scope.locations = list;
 
+        // Delete from Firebase (permanent across all browsers)
         firebase.database().ref('listings/' + location.id).remove()
-            .catch(e => console.warn("Firebase delete silently failed."));
+            .catch(e => console.warn("Firebase delete blocked. Removed from local cache only."));
     };
 
-    // Review
+    // --- REVIEW ---
     $scope.addReview = function(location) {
         if (!location.newReview) return;
-        const list = getAllListings();
+        const reviews = (location.reviews || []).concat([location.newReview]);
+
+        // Update UI and cache
+        location.reviews   = reviews;
+        location.newReview = '';
+        const list = getCached();
         const item = list.find(l => l.id === location.id);
-        if (item) {
-            item.reviews = item.reviews || [];
-            item.reviews.push(location.newReview);
-            saveAllListings(list);
-            location.reviews   = item.reviews;
-            location.newReview = '';
-        }
+        if (item) { item.reviews = reviews; setCache(list); }
+
+        // Save to Firebase
+        firebase.database().ref('listings/' + location.id).update({ reviews: reviews })
+            .catch(e => console.warn("Firebase review blocked. Saved in local cache."));
     };
 
-    // Rate
+    // --- RATE ---
     $scope.rateLocation = function(location, star) {
-        const list = getAllListings();
+        location.rating = star;
+        const list = getCached();
         const item = list.find(l => l.id === location.id);
-        if (item) {
-            item.rating    = star;
-            location.rating = star;
-            saveAllListings(list);
-        }
+        if (item) { item.rating = star; setCache(list); }
+
+        // Save to Firebase
+        firebase.database().ref('listings/' + location.id).update({ rating: star })
+            .catch(e => console.warn("Firebase rating blocked. Saved in local cache."));
     };
 });
