@@ -163,185 +163,123 @@ app.controller('LoginController', function($scope, $rootScope) {
     };
 });
 
-app.controller('ListingsController', function($scope, $timeout, $rootScope) {
-    const getHiddenItems = () => JSON.parse(localStorage.getItem('trip_hidden_items_v2') || '[]');
-    const saveHiddenItem = (item) => {
-        const hidden = getHiddenItems();
-        // Normalize name for robust matching
-        const nameKey = item.name.toLowerCase().trim();
-        if (!hidden.includes(nameKey)) {
-            hidden.push(nameKey);
-            localStorage.setItem('trip_hidden_items_v2', JSON.stringify(hidden));
-        }
-    };
-    $scope.locations = [];
-    $scope.newLocation = {};
-    $scope.editingLocation = {};
-    $scope.showAddModal = false;
-    $scope.showEditModal = false;
+app.controller('ListingsController', function($scope, $rootScope) {
 
-    $scope.openAddModal = function() {
-        $scope.showAddModal = true;
-    };
-    $scope.closeAddModal = function() {
-        $scope.showAddModal = false;
-    };
+    const LS_KEY = 'trip_advisor_listings_v1';
+
+    const defaultListings = [
+        { id: 'def_0', name: "Eiffel Tower", description: "The iconic wrought-iron lattice tower on the Champ de Mars in Paris.", image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A must-see in Paris!"] },
+        { id: 'def_1', name: "Colosseum", description: "The legendary ancient amphitheatre in the heart of Rome, Italy.", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Breathtaking history."] },
+        { id: 'def_2', name: "Santorini", description: "Stunning white-washed buildings overlooking the turquoise Aegean Sea.", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The best sunset ever."] }
+    ];
+
+    function getAllListings() {
+        const stored = localStorage.getItem(LS_KEY);
+        if (stored !== null) return JSON.parse(stored);
+        saveAllListings(defaultListings);
+        return JSON.parse(JSON.stringify(defaultListings));
+    }
+
+    function saveAllListings(list) {
+        localStorage.setItem(LS_KEY, JSON.stringify(list));
+    }
+
+    $scope.locations       = [];
+    $scope.newLocation     = {};
+    $scope.editingLocation = {};
+    $scope.showAddModal    = false;
+    $scope.showEditModal   = false;
+
+    $scope.openAddModal  = function() { $scope.showAddModal  = true; };
+    $scope.closeAddModal = function() { $scope.showAddModal  = false; };
 
     $scope.openEditModal = function(location) {
-        $scope.editingLocation = angular.copy(location);
+        $scope.editingLocation  = angular.copy(location);
         $scope.originalLocation = location;
-        $scope.showEditModal = true;
+        $scope.showEditModal    = true;
     };
     $scope.closeEditModal = function() {
-        $scope.showEditModal = false;
+        $scope.showEditModal   = false;
         $scope.editingLocation = {};
     };
 
-    function loadLocations() {
-        const defaultListings = [
-            { name: "Eiffel Tower", description: "The iconic wrought-iron lattice tower on the Champ de Mars in Paris.", image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A must-see in Paris!"] },
-            { name: "Colosseum", description: "The legendary ancient amphitheatre in the heart of Rome, Italy.", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Breathtaking history."] },
-            { name: "Santorini", description: "Stunning white-washed buildings overlooking the turquoise Aegean Sea.", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The best sunset ever."] }
-        ];
+    // Load from localStorage
+    $scope.locations = getAllListings();
 
-        const blacklisted = ["petra", "great wall of china", "serengeti national park", "galápagos islands", "venice", "mount fuji", "victoria falls", "grand canyon", "taj mahal", "bora bora", "kyoto", "bali", "machu picchu", "banff national park"];
-
-        firebase.database().ref('listings').once('value').then(function(snapshot) {
-            const data = snapshot.val();
-            const dataCount = data ? Object.keys(data).length : 0;
-            
-            // Only seed if the database is COMPLETELY empty
-            if (dataCount === 0) {
-                // Instantly display the default listings so the UI is never empty!
-                const hidden = getHiddenItems();
-                $scope.locations = defaultListings
-                    .map((item, index) => ({ id: 'default_' + index, ...item }))
-                    .filter(item => {
-                        const nameKey = item.name.toLowerCase().trim();
-                        return !hidden.includes(nameKey);
-                    });
-                $scope.$applyAsync();
-                
-                if ($rootScope.user) {
-                    // (Automatic pushing to Firebase removed to prevent ID mismatches)
-                }
-                $scope.locations = Object.keys(data)
-                    .map(key => ({ id: key, ...data[key] }))
-                    .filter(item => {
-                        const nameKey = item.name.toLowerCase().trim();
-                        return !hidden.includes(nameKey) && !blacklisted.includes(nameKey);
-                    });
-                $scope.$applyAsync();
-            }
-        }).catch(function(error) {
-            console.error("Database read failed: ", error.message);
-            // If permission is denied or database read fails, instantly fallback to the 10 default locations!
-            $scope.locations = defaultListings.map((item, index) => ({ id: 'default_' + index, ...item }));
-            $scope.$applyAsync();
-        });
-    }
-    loadLocations();
-
-    // (Seed Data function removed as seeding is now fully automated)
-
-    // Add a new listing (Optimistic UI update)
+    // Add
     $scope.addLocation = function() {
-        if ($scope.newLocation.name && $scope.newLocation.description) {
-            const newObj = {
-                name: $scope.newLocation.name,
-                description: $scope.newLocation.description,
-                image: $scope.newLocation.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png',
-                rating: 0,
-                reviews: []
-            };
-            
-            // 1. Instantly update UI regardless of database connection
-            const mockId = 'local_' + Date.now();
-            $scope.locations.push({ id: mockId, ...newObj });
-            $scope.showAddModal = false;
-            $scope.newLocation = {};
-            
-            // 2. Silently sync with Firebase in background
-            const ref = firebase.database().ref('listings').push();
-            ref.set(newObj).catch(err => {
-                console.error("Database save failed!", err);
-                alert("DATABASE ERROR: Your Firebase rules are blocking this save. Please check your 'Rules' in the Firebase Console and ensure they allow writes.");
+        if (!$scope.newLocation.name || !$scope.newLocation.description) return;
+        const newObj = {
+            id:          'local_' + Date.now(),
+            name:        $scope.newLocation.name,
+            description: $scope.newLocation.description,
+            image:       $scope.newLocation.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80',
+            rating:      0,
+            reviews:     []
+        };
+        const list = getAllListings();
+        list.push(newObj);
+        saveAllListings(list);
+        $scope.locations    = list;
+        $scope.showAddModal = false;
+        $scope.newLocation  = {};
+
+        firebase.database().ref('listings').push({
+            name: newObj.name, description: newObj.description,
+            image: newObj.image, rating: newObj.rating, reviews: newObj.reviews
+        }).catch(e => console.warn("Firebase backup failed. Data saved in browser storage."));
+    };
+
+    // Edit
+    $scope.saveEdit = function() {
+        const list = getAllListings();
+        const idx  = list.findIndex(l => l.id === $scope.editingLocation.id);
+        if (idx > -1) {
+            list[idx] = Object.assign({}, list[idx], {
+                name:        $scope.editingLocation.name,
+                description: $scope.editingLocation.description,
+                image:       $scope.editingLocation.image || list[idx].image
             });
+            saveAllListings(list);
+            $scope.locations = list;
         }
+        $scope.showEditModal = false;
     };
 
-    // Add review (Optimistic UI update)
-    $scope.addReview = function(location) {
-        if (location.newReview) {
-            const reviews = location.reviews || [];
-            
-            // 1. Instantly update UI
-            reviews.push(location.newReview);
-            location.newReview = '';
-            
-            // 2. Silently sync with Firebase if it's not a local mock item
-            if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
-                firebase.database().ref('listings/' + location.id).update({
-                    reviews: reviews
-                }).catch(err => console.warn("Firebase review write blocked, but UI updated successfully."));
-            }
-        }
-    };
-
-    // Rate location (Optimistic UI update)
-    $scope.rateLocation = function(location, star) {
-        // 1. Instantly update UI
-        location.rating = star;
-        
-        // 2. Silently sync with Firebase
-        if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
-            firebase.database().ref('listings/' + location.id).update({
-                rating: star
-            }).catch(err => console.warn("Firebase rating write blocked, but UI updated successfully."));
-        }
-    };
-
-    // Delete location (Optimistic UI update + LocalStorage fallback)
+    // Delete
     $scope.deleteLocation = function(location) {
         if (!confirm("Are you sure you want to delete this destination?")) return;
+        let list = getAllListings();
+        list = list.filter(l => l.id !== location.id);
+        saveAllListings(list);
+        $scope.locations = list;
 
-        // 1. Instantly update UI
-        const index = $scope.locations.indexOf(location);
-        if (index > -1) {
-            $scope.locations.splice(index, 1);
-        }
+        firebase.database().ref('listings/' + location.id).remove()
+            .catch(e => console.warn("Firebase delete silently failed."));
+    };
 
-        // 2. Persistent hidden state (Fallback if Firebase fails)
-        saveHiddenItem(location);
-
-        // 3. Silently sync with Firebase
-        if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
-            firebase.database().ref('listings/' + location.id).remove()
-                .catch(err => {
-                    console.error("Firebase delete failed. Item hidden via localStorage.", err);
-                    alert("Note: Your Firebase Database rules are currently blocking deletions. I've hidden it locally for you, but you should update your rules to '.write': 'auth != null' in the Firebase Console.");
-                });
+    // Review
+    $scope.addReview = function(location) {
+        if (!location.newReview) return;
+        const list = getAllListings();
+        const item = list.find(l => l.id === location.id);
+        if (item) {
+            item.reviews = item.reviews || [];
+            item.reviews.push(location.newReview);
+            saveAllListings(list);
+            location.reviews   = item.reviews;
+            location.newReview = '';
         }
     };
 
-    // Save edited location (Optimistic UI update)
-    $scope.saveEdit = function() {
-        const updatedObj = {
-            name: $scope.editingLocation.name,
-            description: $scope.editingLocation.description,
-            image: $scope.editingLocation.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png',
-            rating: $scope.editingLocation.rating || 0,
-            reviews: $scope.editingLocation.reviews || []
-        };
-
-        // 1. Instantly update UI
-        Object.assign($scope.originalLocation, updatedObj);
-        $scope.showEditModal = false;
-
-        // 2. Silently sync with Firebase
-        if (!$scope.editingLocation.id.startsWith('default_') && !$scope.editingLocation.id.startsWith('local_')) {
-            firebase.database().ref('listings/' + $scope.editingLocation.id).update(updatedObj)
-                .catch(err => console.warn("Firebase update blocked, but UI updated successfully."));
+    // Rate
+    $scope.rateLocation = function(location, star) {
+        const list = getAllListings();
+        const item = list.find(l => l.id === location.id);
+        if (item) {
+            item.rating    = star;
+            location.rating = star;
+            saveAllListings(list);
         }
     };
 });
