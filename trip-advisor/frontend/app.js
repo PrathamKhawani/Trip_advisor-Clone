@@ -157,62 +157,16 @@ app.controller('ListingsController', function($scope, $timeout) {
             if (!data) {
                 // Database is empty, let's seed some default data!
                 const defaultListings = [
-                    {
-                        name: "Eiffel Tower",
-                        description: "A famous wrought-iron lattice tower on the Champ de Mars in Paris, France.",
-                        image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["Absolutely breathtaking view from the top!"]
-                    },
-                    {
-                        name: "Colosseum",
-                        description: "An oval amphitheatre in the centre of the city of Rome, Italy. A marvel of ancient engineering.",
-                        image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80",
-                        rating: 4,
-                        reviews: ["Incredible piece of history."]
-                    },
-                    {
-                        name: "Santorini",
-                        description: "An island in the southern Aegean Sea, famous for its dramatic views and stunning sunsets.",
-                        image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["The sunsets here are unmatched."]
-                    },
-                    {
-                        name: "Kyoto",
-                        description: "Once the capital of Japan, Kyoto is famous for its numerous classical Buddhist temples, gardens, and imperial palaces.",
-                        image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["So peaceful and culturally rich."]
-                    },
-                    {
-                        name: "New York City",
-                        description: "The global center of art, culture, fashion, and finance, home to the iconic Times Square and Statue of Liberty.",
-                        image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80",
-                        rating: 4,
-                        reviews: ["The city that never sleeps!"]
-                    },
-                    {
-                        name: "Bali",
-                        description: "An Indonesian island known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.",
-                        image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["A true tropical paradise."]
-                    },
-                    {
-                        name: "Machu Picchu",
-                        description: "A 15th-century Inca citadel set high in the Andes Mountains in Peru, above the Urubamba River valley.",
-                        image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["The hike was challenging but worth every step."]
-                    },
-                    {
-                        name: "Banff National Park",
-                        description: "Canada's oldest national park, encompassing 6,641 square kilometres of mountainous terrain, glaciers and ice fields.",
-                        image: "https://images.unsplash.com/photo-1534067783941-51c9c2a8dc4e?auto=format&fit=crop&w=800&q=80",
-                        rating: 5,
-                        reviews: ["The bluest water I've ever seen."]
-                    }
+                    { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
+                    { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["A breathtaking architectural marvel."] },
+                    { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
+                    { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://images.unsplash.com/photo-1580826978418-490baf754b23?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Nature at its finest."] },
+                    { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
+                    { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
+                    { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://images.unsplash.com/photo-1606563605510-4c3e803fb28b?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sheer power of the water is humbling."] },
+                    { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
+                    { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://images.unsplash.com/photo-1564507592228-00d8b4e760c4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A stunning monument of love."] },
+                    { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://images.unsplash.com/photo-1533614767277-bfddde5bd9b4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
                 ];
                 
                 // Only try to push if we have a user (meaning we bypassed permission denied, or rules are open)
@@ -253,14 +207,16 @@ app.controller('ListingsController', function($scope, $timeout) {
         
         firebase.database().ref('listings').remove().then(() => {
             const defaultListings = [
-                { name: "Eiffel Tower", description: "A famous wrought-iron lattice tower on the Champ de Mars in Paris, France.", image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Absolutely breathtaking view from the top!"] },
-                { name: "Colosseum", description: "An oval amphitheatre in the centre of the city of Rome, Italy. A marvel of ancient engineering.", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Incredible piece of history."] },
-                { name: "Santorini", description: "An island in the southern Aegean Sea, famous for its dramatic views and stunning sunsets.", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sunsets here are unmatched."] },
-                { name: "Kyoto", description: "Once the capital of Japan, Kyoto is famous for its numerous classical Buddhist temples, gardens, and imperial palaces.", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["So peaceful and culturally rich."] },
-                { name: "New York City", description: "The global center of art, culture, fashion, and finance, home to the iconic Times Square and Statue of Liberty.", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["The city that never sleeps!"] },
-                { name: "Bali", description: "An Indonesian island known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A true tropical paradise."] },
-                { name: "Machu Picchu", description: "A 15th-century Inca citadel set high in the Andes Mountains in Peru, above the Urubamba River valley.", image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The hike was challenging but worth every step."] },
-                { name: "Banff National Park", description: "Canada's oldest national park, encompassing 6,641 square kilometres of mountainous terrain, glaciers and ice fields.", image: "https://images.unsplash.com/photo-1534067783941-51c9c2a8dc4e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The bluest water I've ever seen."] }
+                { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
+                { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["A breathtaking architectural marvel."] },
+                { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
+                { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://images.unsplash.com/photo-1580826978418-490baf754b23?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Nature at its finest."] },
+                { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
+                { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
+                { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://images.unsplash.com/photo-1606563605510-4c3e803fb28b?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sheer power of the water is humbling."] },
+                { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
+                { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://images.unsplash.com/photo-1564507592228-00d8b4e760c4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A stunning monument of love."] },
+                { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://images.unsplash.com/photo-1533614767277-bfddde5bd9b4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
             ];
             
             defaultListings.forEach(item => {
