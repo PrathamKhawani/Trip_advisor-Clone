@@ -151,54 +151,46 @@ app.controller('ListingsController', function($scope, $timeout) {
 
     // Fetch listings from Firebase
     function loadLocations() {
+        const defaultListings = [
+            { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
+            { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["A breathtaking architectural marvel."] },
+            { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
+            { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://images.unsplash.com/photo-1580826978418-490baf754b23?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Nature at its finest."] },
+            { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
+            { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
+            { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://images.unsplash.com/photo-1606563605510-4c3e803fb28b?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sheer power of the water is humbling."] },
+            { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
+            { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://images.unsplash.com/photo-1564507592228-00d8b4e760c4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A stunning monument of love."] },
+            { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://images.unsplash.com/photo-1533614767277-bfddde5bd9b4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
+        ];
+
         firebase.database().ref('listings').once('value').then(function(snapshot) {
             const data = snapshot.val();
             const dataCount = data ? Object.keys(data).length : 0;
             
-            // If the database is empty or only has the old 3 items, auto-seed the 10 new locations.
+            // If the database is empty or only has the old items, auto-seed the 10 new locations.
             if (dataCount < 5) {
-                const defaultListings = [
-                    { name: "Petra", description: "A famous archaeological site in Jordan's southwestern desert, known for its rock-cut architecture.", image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A mesmerizing historical wonder!"] },
-                    { name: "Great Wall of China", description: "An ancient series of walls and fortifications, totaling more than 13,000 miles in length.", image: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["A breathtaking architectural marvel."] },
-                    { name: "Serengeti National Park", description: "A vast ecosystem in east-central Africa, famous for its annual migration of over 1.5 million white-bearded wildebeest.", image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The wildlife safari was unbelievable."] },
-                    { name: "Galápagos Islands", description: "A volcanic archipelago in the Pacific Ocean, considered one of the world's foremost destinations for wildlife-viewing.", image: "https://images.unsplash.com/photo-1580826978418-490baf754b23?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Nature at its finest."] },
-                    { name: "Venice", description: "The capital of northern Italy’s Veneto region, built on more than 100 small islands in a lagoon in the Adriatic Sea.", image: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Riding a gondola here is a must-do."] },
-                    { name: "Mount Fuji", description: "Japan’s highest mountain, known for its exceptionally symmetrical cone, which is snow-capped for about 5 months a year.", image: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Spectacular views, especially at sunrise."] },
-                    { name: "Victoria Falls", description: "A waterfall on the Zambezi River in southern Africa, which provides habitat for several unique species of plants and animals.", image: "https://images.unsplash.com/photo-1606563605510-4c3e803fb28b?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sheer power of the water is humbling."] },
-                    { name: "Grand Canyon", description: "A steep-sided canyon carved by the Colorado River in Arizona, United States, known for its visually overwhelming size.", image: "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The scale is impossible to comprehend until you see it."] },
-                    { name: "Taj Mahal", description: "An ivory-white marble mausoleum on the southern bank of the river Yamuna in the Indian city of Agra.", image: "https://images.unsplash.com/photo-1564507592228-00d8b4e760c4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A stunning monument of love."] },
-                    { name: "Bora Bora", description: "A small South Pacific island northwest of Tahiti in French Polynesia, surrounded by sand-fringed motus and a turquoise lagoon.", image: "https://images.unsplash.com/photo-1533614767277-bfddde5bd9b4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The overwater bungalows were luxurious."] }
-                ];
+                // Instantly display the default listings so the UI is never empty!
+                $scope.locations = defaultListings.map((item, index) => ({ id: 'default_' + index, ...item }));
+                $scope.$applyAsync();
                 
+                // Attempt to update the database in the background if the user has write permissions
                 if ($rootScope.user) {
-                    firebase.database().ref('listings').remove().then(() => {
+                    firebase.database().ref('listings').set(null).then(() => {
                         defaultListings.forEach(item => {
                             firebase.database().ref('listings').push(item);
                         });
-                        $timeout(loadLocations, 1500);
-                    });
-                } else {
-                    $scope.locations = defaultListings.map((item, index) => ({ id: 'mock_' + index, ...item }));
-                    $scope.$apply();
+                    }).catch(e => console.warn("Database write blocked (permission denied), using UI fallback."));
                 }
             } else {
                 $scope.locations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-                $scope.$apply();
+                $scope.$applyAsync();
             }
         }).catch(function(error) {
             console.error("Database read failed: ", error.message);
-            // If permission is denied or database read fails, fallback to local mock data
-            $scope.locations = [
-                {
-                    id: 'mock_1',
-                    name: "Eiffel Tower (Mock Data)",
-                    description: "Firebase Database read failed. Displaying local mock data.",
-                    image: "https://upload.wikimedia.org/wikipedia/commons/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
-                    rating: 5,
-                    reviews: []
-                }
-            ];
-            $scope.$apply();
+            // If permission is denied or database read fails, instantly fallback to the 10 default locations!
+            $scope.locations = defaultListings.map((item, index) => ({ id: 'default_' + index, ...item }));
+            $scope.$applyAsync();
         });
     }
     loadLocations();
