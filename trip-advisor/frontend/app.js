@@ -20,6 +20,18 @@ var app = angular.module('tripAdvisorApp', ['ngRoute']);
 
 app.config(function($routeProvider) {
     $routeProvider
+        .when('/login', {
+            template: `
+                <div class="login-container" style="text-align: center; margin-top: 80px;">
+                    <h2 style="color: #00a680; font-size: 2.5rem; margin-bottom: 20px;">Welcome to TripAdvisor Clone</h2>
+                    <p style="font-size: 1.2rem; color: #555; margin-bottom: 40px;">Please sign in to access the destinations and reviews.</p>
+                    <button ng-click="login()" style="padding: 14px 28px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; background: #00a680; color: white; border: none; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: background 0.2s;">
+                        Sign In with Google
+                    </button>
+                </div>
+            `,
+            controller: 'LoginController'
+        })
         .when('/listings', {
             template: `
                 <div>
@@ -70,28 +82,50 @@ app.config(function($routeProvider) {
             template: `<h2>About</h2><p>TripAdvisor Clone Project</p>`
         })
         .otherwise({
-            redirectTo: '/listings'
+            redirectTo: '/login'
         });
 });
 
-app.run(function($rootScope) {
+app.run(function($rootScope, $location) {
     $rootScope.user = null;
+    $rootScope.authInitialized = false;
+
     firebase.auth().onAuthStateChanged(function(user) {
+        $rootScope.authInitialized = true;
         $rootScope.user = user;
-        $rootScope.$applyAsync();
+        $rootScope.$applyAsync(function() {
+            if (user) {
+                if ($location.path() === '/login') {
+                    $location.path('/listings');
+                }
+            } else {
+                $location.path('/login');
+            }
+        });
+    });
+
+    $rootScope.$on('$routeChangeStart', function(event, next, current) {
+        if ($rootScope.authInitialized && !$rootScope.user) {
+            if (next && next.originalPath !== '/login') {
+                $location.path('/login');
+            }
+        }
     });
 });
 
 app.controller('AuthController', function($scope, $rootScope) {
+    $scope.logout = function() {
+        firebase.auth().signOut();
+    };
+});
+
+app.controller('LoginController', function($scope, $rootScope) {
     $scope.login = function() {
         const provider = new firebase.auth.GoogleAuthProvider();
         firebase.auth().signInWithPopup(provider).catch(function(error) {
             console.error("Login failed", error);
             alert("Login failed: " + error.message);
         });
-    };
-    $scope.logout = function() {
-        firebase.auth().signOut();
     };
 });
 

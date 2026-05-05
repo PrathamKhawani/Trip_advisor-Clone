@@ -87,7 +87,6 @@
         </nav>
         <div class="auth-section" style="margin-top: 15px;">
             <span ng-if="user" style="margin-right: 15px; font-weight: bold;">Welcome, {{user.displayName}}</span>
-            <button ng-if="!user" ng-click="login()" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #ffe082; border: none; font-weight: bold; color: #333;">Sign In with Google</button>
             <button ng-if="user" ng-click="logout()" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #e74c3c; color: white; border: none; font-weight: bold;">Sign Out</button>
         </div>
     </header>
