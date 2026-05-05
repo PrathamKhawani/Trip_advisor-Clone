@@ -79,7 +79,17 @@ app.config(function($routeProvider) {
             controller: 'ListingsController'
         })
         .when('/about', {
-            template: `<h2>About</h2><p>TripAdvisor Clone Project</p>`
+            template: `
+                <div style="padding: 40px; text-align: center; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                    <h2 style="color: #00a680; font-size: 2.5rem; margin-bottom: 20px;">About TripAdvisor Clone</h2>
+                    <p style="font-size: 1.2rem; color: #555; max-width: 800px; margin: 0 auto 30px auto; line-height: 1.6;">
+                        This is a modern, single-page application built using AngularJS and Firebase. 
+                        Our mission is to help travelers discover the best destinations around the world.
+                        You can browse stunning locations, read authentic reviews, and share your own travel experiences!
+                    </p>
+                    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80" alt="Travel" style="width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                </div>
+            `
         })
         .otherwise({
             redirectTo: '/login'
@@ -137,8 +147,60 @@ app.controller('ListingsController', function($scope, $timeout) {
     // Fetch listings from Firebase
     function loadLocations() {
         firebase.database().ref('listings').once('value').then(function(snapshot) {
-            const data = snapshot.val() || {};
-            $scope.locations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            const data = snapshot.val();
+            if (!data) {
+                // Database is empty, let's seed some default data!
+                const defaultListings = [
+                    {
+                        name: "Eiffel Tower",
+                        description: "A famous wrought-iron lattice tower on the Champ de Mars in Paris, France.",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
+                        rating: 5,
+                        reviews: ["Absolutely breathtaking view from the top!"]
+                    },
+                    {
+                        name: "Colosseum",
+                        description: "An oval amphitheatre in the centre of the city of Rome, Italy. A marvel of ancient engineering.",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/d/d8/Colosseum_in_Rome-April_2007-1-_copie_2B.jpg",
+                        rating: 4,
+                        reviews: ["Incredible piece of history."]
+                    },
+                    {
+                        name: "Santorini",
+                        description: "An island in the southern Aegean Sea, southeast of Greece's mainland.",
+                        image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80",
+                        rating: 5,
+                        reviews: ["The sunsets here are unmatched."]
+                    }
+                ];
+                
+                // Only try to push if we have a user (meaning we bypassed permission denied, or rules are open)
+                if ($rootScope.user) {
+                    defaultListings.forEach(item => {
+                        firebase.database().ref('listings').push(item);
+                    });
+                    $timeout(loadLocations, 1500);
+                } else {
+                    $scope.locations = defaultListings.map((item, index) => ({ id: 'mock_' + index, ...item }));
+                    $scope.$apply();
+                }
+            } else {
+                $scope.locations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                $scope.$apply();
+            }
+        }).catch(function(error) {
+            console.error("Database read failed: ", error.message);
+            // If permission is denied or database read fails, fallback to local mock data
+            $scope.locations = [
+                {
+                    id: 'mock_1',
+                    name: "Eiffel Tower (Mock Data)",
+                    description: "Firebase Database read failed. Displaying local mock data.",
+                    image: "https://upload.wikimedia.org/wikipedia/commons/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
+                    rating: 5,
+                    reviews: []
+                }
+            ];
             $scope.$apply();
         });
     }
