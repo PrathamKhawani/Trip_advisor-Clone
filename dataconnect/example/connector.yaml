@@ -1,0 +1,23 @@
+connectorId: example
+generate:
+  javascriptSdk:
+    - outputDir: ..\..\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..
+      react: false
+      angular: false
+    - outputDir: ..\..\tripadvisor\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\tripadvisor
+      react: false
+      angular: false
+    - outputDir: ..\..\functions\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\functions
+      react: false
+      angular: false
+    - outputDir: ..\..\trip-advisor\backend\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\trip-advisor\backend
+      react: false
+      angular: false

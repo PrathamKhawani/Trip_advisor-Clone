@@ -1,0 +1,46 @@
+mutation CreateTrip @auth(level: USER) {
+  trip_insert(data: {
+    name: "My New Trip",
+    description: "A trip I'm planning",
+    startDate: "2024-01-01",
+    createdAt_expr: "request.time",
+    userId_expr: "auth.uid",
+    isPublic: false
+  })
+}
+
+query GetPublicTrips @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  trips(where: {isPublic: {eq: true}}) {
+    id
+    name
+    description
+    startDate
+  }
+}
+
+mutation AddEstablishmentToTrip($tripId: UUID!, $establishmentId: UUID!, $orderIndex: Int!) @auth(level: USER) {
+  tripItem_insert(data: {
+    tripId: $tripId,
+    establishmentId: $establishmentId,
+    orderIndex: $orderIndex,
+    createdAt_expr: "request.time"
+  })
+}
+
+query GetMyTrips @auth(level: USER) {
+  trips(where: {userId: {eq_expr: "auth.uid"}}) {
+    id
+    name
+    description
+    startDate
+    endDate
+    tripItems_on_trip {
+      establishment {
+        id
+        name
+      }
+      orderIndex
+      notes
+    }
+  }
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tripAdvisorApp">
+<head>
+    <meta charset="UTF-8">
+    <title>TripAdvisor Clone (AngularJS)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:600,400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #00a680, #008060, #00c6fb, #005bea);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% {background-position:0% 50%;}
+            50% {background-position:100% 50%;}
+            100% {background-position:0% 50%;}
+        }
+        header { background: rgba(0,0,0,0.18); color: #fff; padding: 30px 0 20px 0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);}
+        header h1 { font-size: 2.5rem; margin: 0 0 10px 0; letter-spacing: 2px;}
+        nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: color 0.2s;}
+        nav a:hover { color: #ffe082; }
+        .container { max-width: 1100px; margin: 40px auto; background: rgba(255,255,255,0.97); padding: 40px 30px 30px 30px; border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,0.09);}
+        .top-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 30px;}
+        .search-bar { flex: 1; min-width: 200px; padding: 10px 16px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; margin-right: 20px;}
+        .sort-select, .fav-filter { padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 1rem;}
+        .count { font-size: 1.1rem; color: #00a680; font-weight: 600;}
+        .location-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 28px;}
+        .location-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 0 0 18px 0; transition: transform 0.18s, box-shadow 0.18s; position: relative; overflow: hidden; opacity: 0; transform: translateY(40px); animation: cardIn 0.7s forwards;}
+        @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+        .location-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 14px 14px 0 0;}
+        .location-card-content { padding: 18px 18px 0 18px;}
+        .location-card h3 { color: #00a680; margin: 0 0 8px 0; font-size: 1.3rem;}
+        .location-card p { color: #444; margin: 0 0 12px 0;}
+        .stars { font-size: 1.3rem; margin-bottom: 6px;}
+        .star { cursor: pointer; transition: transform 0.15s;}
+        .star:hover { transform: scale(1.2);}
+        .rating-count { color: #888; font-size: 0.95rem;}
+        .delete-btn { position: absolute; top: 12px; right: 12px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.09);}
+        .delete-btn:hover { background: #c0392b;}
+        .fav-btn { position: absolute; top: 12px; left: 12px; background: #ffe082; color: #f39c12; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.09);}
+        .fav-btn.fav { background: #f39c12; color: #fff;}
+        .fav-btn:hover { background: #ffd700;}
+        .reviews { margin-top: 10px;}
+        .reviews ul { padding-left: 18px; margin: 0;}
+        .reviews li { color: #333; margin-bottom: 4px;}
+        .review-form { display: flex; gap: 8px; margin-top: 8px;}
+        .review-form input { flex: 1; padding: 7px; border-radius: 6px; border: 1px solid #e0e0e0;}
+        .review-form button { background: #00a680; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer;}
+        .review-form button:hover { background: #008060;}
+        .add-btn { position: fixed; bottom: 38px; right: 38px; background: #00a680; color: #fff; border: none; border-radius: 50%; width: 62px; height: 62px; font-size: 2.2rem; box-shadow: 0 4px 18px rgba(0,0,0,0.13); cursor: pointer; z-index: 10; transition: background 0.2s;}
+        .add-btn:hover { background: #008060;}
+        /* Modal styles */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; z-index: 100;}
+        .modal { background: #fff; padding: 32px 28px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 95vw;}
+        .modal h2 { margin-top: 0; color: #00a680;}
+        .modal form { display: flex; flex-direction: column; gap: 14px;}
+        .modal input { padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0;}
+        .modal button { background: #00a680; color: #fff; border: none; padding: 10px 0; border-radius: 8px; cursor: pointer; font-size: 1.1rem;}
+        .modal button:hover { background: #008060;}
+        .close-modal { position: absolute; top: 18px; right: 22px; font-size: 1.5rem; color: #888; cursor: pointer;}
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #00a680; color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 1.1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.13); z-index: 200; animation: fadeIn 0.3s;}
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 700px) {
+            .container { padding: 10px; }
+            .location-list { grid-template-columns: 1fr; }
+            .add-btn { right: 18px; bottom: 18px;}
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- THEN your app.js -->
+    <script src="app.js"></script>
+</head>
+<body>
+    <header ng-controller="AuthController">
+        <h1>TripAdvisor Clone</h1>
+        <nav>
+            <a href="#!/listings">Listings</a> |
+            <a href="#!/about">About</a>
+        </nav>
+        <div class="auth-section" style="margin-top: 15px;">
+            <span ng-if="user" style="margin-right: 15px; font-weight: bold;">Welcome, {{user.displayName}}</span>
+            <button ng-if="!user" ng-click="login()" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #ffe082; border: none; font-weight: bold; color: #333;">Sign In with Google</button>
+            <button ng-if="user" ng-click="logout()" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #e74c3c; color: white; border: none; font-weight: bold;">Sign Out</button>
+        </div>
+    </header>
+    <div class="container">
+        <div ng-view></div>
+    </div>
+</body>
+</html>

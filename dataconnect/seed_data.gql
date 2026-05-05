@@ -1,0 +1,142 @@
+mutation CreateSeedData @transaction @auth(level: PUBLIC, insecureReason: "This mutation is used to populate the database with initial data and is safe to expose.") {
+  location_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      country: "USA",
+      createdAt: "2024-01-01T00:00:00Z",
+      description: "Example location 1",
+      latitude: 34.0522,
+      longitude: -118.2437,
+      name: "Los Angeles"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      country: "Canada",
+      createdAt: "2024-01-01T00:00:00Z",
+      description: "Example location 2",
+      latitude: 45.5017,
+      longitude: -73.5673,
+      name: "Montreal"
+    }
+  ])
+  establishment_insertMany(data: [
+    {
+      id: "650e8400-e29b-41d4-a716-446655440002",
+      locationId: "550e8400-e29b-41d4-a716-446655440000",
+      address: "123 Main St",
+      averageRating: 4.5,
+      createdAt: "2024-01-02T00:00:00Z",
+      description: "Example establishment 1",
+      name: "Restaurant A",
+      phoneNumber: "555-1234",
+      type: "Restaurant",
+      website: "http://example.com"
+    },
+    {
+      id: "650e8400-e29b-41d4-a716-446655440003",
+      locationId: "550e8400-e29b-41d4-a716-446655440001",
+      address: "456 Elm St",
+      averageRating: 4.0,
+      createdAt: "2024-01-02T00:00:00Z",
+      description: "Example establishment 2",
+      name: "Hotel B",
+      phoneNumber: "555-5678",
+      type: "Hotel",
+      website: "http://example2.com"
+    }
+  ])
+  user_insertMany(data: [
+    {
+      id: "750e8400-e29b-41d4-a716-446655440004",
+      bio: "Example bio 1",
+      createdAt: "2024-01-03T00:00:00Z",
+      displayName: "User C",
+      email: "userc@example.com",
+      hometown: "New York",
+      profilePictureUrl: "http://example.com/userc.jpg",
+      username: "userc"
+    },
+    {
+      id: "750e8400-e29b-41d4-a716-446655440005",
+      bio: "Example bio 2",
+      createdAt: "2024-01-03T00:00:00Z",
+      displayName: "User D",
+      email: "userd@example.com",
+      hometown: "Chicago",
+      profilePictureUrl: "http://example.com/userd.jpg",
+      username: "userd"
+    }
+  ])
+  review_insertMany(data: [
+    {
+      id: "850e8400-e29b-41d4-a716-446655440006",
+      establishmentId: "650e8400-e29b-41d4-a716-446655440002",
+      userId: "750e8400-e29b-41d4-a716-446655440004",
+      createdAt: "2024-01-04T00:00:00Z",
+      rating: 5,
+      reviewText: "Example review 1",
+      title: "Great place",
+      travelType: "Business",
+      updatedAt: "2024-01-04T00:00:00Z"
+    },
+    {
+      id: "850e8400-e29b-41d4-a716-446655440007",
+      establishmentId: "650e8400-e29b-41d4-a716-446655440003",
+      userId: "750e8400-e29b-41d4-a716-446655440005",
+      createdAt: "2024-01-04T00:00:00Z",
+      rating: 4,
+      reviewText: "Example review 2",
+      title: "Nice stay",
+      travelType: "Leisure",
+      updatedAt: "2024-01-04T00:00:00Z"
+    }
+  ])
+  photo_insertMany(data: [
+    {
+      id: "950e8400-e29b-41d4-a716-446655440008",
+      associatedEstablishmentId: "650e8400-e29b-41d4-a716-446655440002",
+      userId: "750e8400-e29b-41d4-a716-446655440004",
+      createdAt: "2024-01-05T00:00:00Z",
+      imageUrl: "http://example.com/photo1.jpg"
+    },
+    {
+      id: "950e8400-e29b-41d4-a716-446655440009",
+      associatedReviewId: "850e8400-e29b-41d4-a716-446655440007",
+      userId: "750e8400-e29b-41d4-a716-446655440005",
+      createdAt: "2024-01-05T00:00:00Z",
+      imageUrl: "http://example.com/photo2.jpg"
+    }
+  ])
+  trip_insertMany(data: [
+    {
+      id: "a50e8400-e29b-41d4-a716-446655440010",
+      userId: "750e8400-e29b-41d4-a716-446655440004",
+      createdAt: "2024-01-06T00:00:00Z",
+      name: "Trip A",
+      startDate: "2024-02-01",
+      isPublic: true
+    },
+    {
+      id: "a50e8400-e29b-41d4-a716-446655440011",
+      userId: "750e8400-e29b-41d4-a716-446655440005",
+      createdAt: "2024-01-06T00:00:00Z",
+      name: "Trip B",
+      startDate: "2024-03-01",
+      isPublic: false
+    }
+  ])
+  tripItem_insertMany(data: [
+    {
+      tripId: "a50e8400-e29b-41d4-a716-446655440010",
+      establishmentId: "650e8400-e29b-41d4-a716-446655440002",
+      createdAt: "2024-01-07T00:00:00Z",
+      orderIndex: 1
+    },
+    {
+      tripId: "a50e8400-e29b-41d4-a716-446655440011",
+      establishmentId: "650e8400-e29b-41d4-a716-446655440003",
+      createdAt: "2024-01-07T00:00:00Z",
+      orderIndex: 1
+    }
+  ])
+}
