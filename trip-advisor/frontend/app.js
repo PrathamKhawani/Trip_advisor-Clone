@@ -204,19 +204,17 @@ app.controller('ListingsController', function($scope, $timeout) {
             const data = snapshot.val();
             const dataCount = data ? Object.keys(data).length : 0;
             
-            // If the database is empty or only has the old items, auto-seed the 10 new locations.
-            if (dataCount < 5) {
+            // Only seed if the database is COMPLETELY empty
+            if (dataCount === 0) {
                 // Instantly display the default listings so the UI is never empty!
                 $scope.locations = defaultListings.map((item, index) => ({ id: 'default_' + index, ...item }));
                 $scope.$applyAsync();
                 
                 // Attempt to update the database in the background if the user has write permissions
                 if ($rootScope.user) {
-                    firebase.database().ref('listings').set(null).then(() => {
-                        defaultListings.forEach(item => {
-                            firebase.database().ref('listings').push(item);
-                        });
-                    }).catch(e => console.warn("Database write blocked (permission denied), using UI fallback."));
+                    defaultListings.forEach(item => {
+                        firebase.database().ref('listings').push(item);
+                    });
                 }
             } else {
                 $scope.locations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
