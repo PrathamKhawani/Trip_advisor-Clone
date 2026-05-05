@@ -57,7 +57,10 @@ app.config(function($routeProvider) {
                                 <img ng-if="location.image" ng-src="{{location.image}}" alt="{{location.name}}">
                             </div>
                             <div class="location-card-content">
-                                <h3>{{location.name}}</h3>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <h3 style="margin: 0;">{{location.name}}</h3>
+                                    <button ng-if="user" ng-click="deleteLocation(location)" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0 0 0 10px; line-height: 1;" title="Delete Destination">&times;</button>
+                                </div>
                                 <p>{{location.description}}</p>
                                 <div class="stars">
                                     <span ng-repeat="star in [1,2,3,4,5]" ng-click="user && rateLocation(location, star)" class="star" ng-style="{'cursor': user ? 'pointer' : 'default'}">
@@ -254,6 +257,23 @@ app.controller('ListingsController', function($scope, $timeout) {
             firebase.database().ref('listings/' + location.id).update({
                 rating: star
             }).catch(err => console.warn("Firebase rating write blocked, but UI updated successfully."));
+        }
+    };
+
+    // Delete location (Optimistic UI update)
+    $scope.deleteLocation = function(location) {
+        if (!confirm("Are you sure you want to delete this destination?")) return;
+
+        // 1. Instantly update UI
+        const index = $scope.locations.indexOf(location);
+        if (index > -1) {
+            $scope.locations.splice(index, 1);
+        }
+
+        // 2. Silently sync with Firebase
+        if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
+            firebase.database().ref('listings/' + location.id).remove()
+                .catch(err => console.warn("Firebase delete blocked, but UI updated successfully."));
         }
     };
 });
