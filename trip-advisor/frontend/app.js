@@ -5,6 +5,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCvlKFSh1cyQ5Tvpj3fW-U00uRO5sr0RM4",
   authDomain: "trip-advisor-9bfab.firebaseapp.com",
   projectId: "trip-advisor-9bfab",
+  databaseURL: "https://trip-advisor-9bfab-default-rtdb.firebaseio.com",
   storageBucket: "trip-advisor-9bfab.appspot.com",
   messagingSenderId: "963916169319",
   appId: "1:963916169319:web:be01c78633dcdd15b314c2",
@@ -262,7 +263,10 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
             
             // 2. Silently sync with Firebase in background
             const ref = firebase.database().ref('listings').push();
-            ref.set(newObj).catch(err => console.warn("Firebase write blocked, but UI updated successfully."));
+            ref.set(newObj).catch(err => {
+                console.error("Database save failed!", err);
+                alert("DATABASE ERROR: Your Firebase rules are blocking this save. Please check your 'Rules' in the Firebase Console and ensure they allow writes.");
+            });
         }
     };
 
