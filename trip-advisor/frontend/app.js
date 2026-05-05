@@ -164,10 +164,12 @@ app.controller('LoginController', function($scope, $rootScope) {
 
 app.controller('ListingsController', function($scope, $timeout, $rootScope) {
     const getHiddenItems = () => JSON.parse(localStorage.getItem('trip_hidden_items') || '[]');
-    const saveHiddenItem = (id) => {
+    const saveHiddenItem = (item) => {
         const hidden = getHiddenItems();
-        if (!hidden.includes(id)) {
-            hidden.push(id);
+        // Use the item's ID or name as a unique key for the hidden list
+        const key = item.id || item.name; 
+        if (!hidden.includes(key)) {
+            hidden.push(key);
             localStorage.setItem('trip_hidden_items', JSON.stringify(hidden));
         }
     };
@@ -218,20 +220,17 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
                 const hidden = getHiddenItems();
                 $scope.locations = defaultListings
                     .map((item, index) => ({ id: 'default_' + index, ...item }))
-                    .filter(item => !hidden.includes(item.id));
+                    .filter(item => !hidden.includes(item.id) && !hidden.includes(item.name));
                 $scope.$applyAsync();
                 
-                // Attempt to update the database in the background if the user has write permissions
                 if ($rootScope.user) {
-                    defaultListings.forEach(item => {
-                        firebase.database().ref('listings').push(item);
-                    });
+                    // (Automatic pushing to Firebase removed to prevent ID mismatches)
                 }
             } else {
                 const hidden = getHiddenItems();
                 $scope.locations = Object.keys(data)
                     .map(key => ({ id: key, ...data[key] }))
-                    .filter(item => !hidden.includes(item.id));
+                    .filter(item => !hidden.includes(item.id) && !hidden.includes(item.name));
                 $scope.$applyAsync();
             }
         }).catch(function(error) {
@@ -310,7 +309,7 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
         }
 
         // 2. Persistent hidden state (Fallback if Firebase fails)
-        saveHiddenItem(location.id);
+        saveHiddenItem(location);
 
         // 3. Silently sync with Firebase
         if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
