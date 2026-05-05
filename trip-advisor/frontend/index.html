@@ -4,70 +4,90 @@
     <meta charset="UTF-8">
     <title>TripAdvisor Clone (AngularJS)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:600,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #f8fafc;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+        }
         body {
-            font-family: 'Montserrat', Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             min-height: 100vh;
-            background: linear-gradient(-45deg, #00a680, #008060, #00c6fb, #005bea);
-            background-size: 400% 400%;
-            animation: gradientBG 12s ease infinite;
+            background: var(--bg);
+            color: var(--text-main);
         }
-        @keyframes gradientBG {
-            0% {background-position:0% 50%;}
-            50% {background-position:100% 50%;}
-            100% {background-position:0% 50%;}
+        header { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px 40px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
-        header { background: rgba(0,0,0,0.18); color: #fff; padding: 30px 0 20px 0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);}
-        header h1 { font-size: 2.5rem; margin: 0 0 10px 0; letter-spacing: 2px;}
-        nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: color 0.2s;}
-        nav a:hover { color: #ffe082; }
-        .container { max-width: 1100px; margin: 40px auto; background: rgba(255,255,255,0.97); padding: 40px 30px 30px 30px; border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,0.09);}
-        .top-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 30px;}
-        .search-bar { flex: 1; min-width: 200px; padding: 10px 16px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; margin-right: 20px;}
-        .sort-select, .fav-filter { padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 1rem;}
-        .count { font-size: 1.1rem; color: #00a680; font-weight: 600;}
-        .location-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 28px;}
-        .location-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 0 0 18px 0; transition: transform 0.18s, box-shadow 0.18s; position: relative; overflow: hidden; opacity: 0; transform: translateY(40px); animation: cardIn 0.7s forwards;}
-        @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
-        .location-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 14px 14px 0 0;}
-        .location-card-content { padding: 18px 18px 0 18px;}
-        .location-card h3 { color: #00a680; margin: 0 0 8px 0; font-size: 1.3rem;}
-        .location-card p { color: #444; margin: 0 0 12px 0;}
-        .stars { font-size: 1.3rem; margin-bottom: 6px;}
-        .star { cursor: pointer; transition: transform 0.15s;}
+        .header-left { display: flex; align-items: center; gap: 30px; }
+        header h1 { font-size: 1.8rem; margin: 0; font-weight: 700; color: var(--primary); letter-spacing: -0.5px;}
+        nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 1rem; transition: color 0.2s;}
+        nav a:hover { color: var(--primary); }
+        .auth-section { display: flex; align-items: center; }
+        .btn-primary { padding: 10px 20px; border-radius: 8px; cursor: pointer; background: var(--primary); color: white; border: none; font-weight: 600; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-secondary { padding: 8px 16px; border-radius: 8px; cursor: pointer; background: #fff; color: var(--text-main); border: 1px solid #e2e8f0; font-weight: 600; transition: all 0.2s; }
+        .btn-secondary:hover { background: #f1f5f9; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        .location-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;}
+        .location-card { background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); padding: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column;}
+        .location-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .card-image-wrapper { height: 220px; overflow: hidden; position: relative; }
+        .location-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;}
+        .location-card:hover img { transform: scale(1.05); }
+        .location-card-content { padding: 24px; flex-grow: 1; display: flex; flex-direction: column;}
+        .location-card h3 { color: var(--text-main); margin: 0 0 10px 0; font-size: 1.4rem; font-weight: 700; line-height: 1.2;}
+        .location-card p { color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.95rem; line-height: 1.5; flex-grow: 1;}
+        .stars { font-size: 1.4rem; margin-bottom: 12px; display: flex; align-items: center; gap: 2px;}
+        .star { cursor: pointer; transition: transform 0.15s; color: #fbbf24;}
         .star:hover { transform: scale(1.2);}
-        .rating-count { color: #888; font-size: 0.95rem;}
-        .delete-btn { position: absolute; top: 12px; right: 12px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.09);}
-        .delete-btn:hover { background: #c0392b;}
-        .fav-btn { position: absolute; top: 12px; left: 12px; background: #ffe082; color: #f39c12; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.09);}
-        .fav-btn.fav { background: #f39c12; color: #fff;}
-        .fav-btn:hover { background: #ffd700;}
-        .reviews { margin-top: 10px;}
-        .reviews ul { padding-left: 18px; margin: 0;}
-        .reviews li { color: #333; margin-bottom: 4px;}
-        .review-form { display: flex; gap: 8px; margin-top: 8px;}
-        .review-form input { flex: 1; padding: 7px; border-radius: 6px; border: 1px solid #e0e0e0;}
-        .review-form button { background: #00a680; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer;}
-        .review-form button:hover { background: #008060;}
-        .add-btn { position: fixed; bottom: 38px; right: 38px; background: #00a680; color: #fff; border: none; border-radius: 50%; width: 62px; height: 62px; font-size: 2.2rem; box-shadow: 0 4px 18px rgba(0,0,0,0.13); cursor: pointer; z-index: 10; transition: background 0.2s;}
-        .add-btn:hover { background: #008060;}
+        .rating-count { color: var(--text-muted); font-size: 0.9rem; margin-left: 8px; font-weight: 500;}
+        
+        .reviews { margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 16px;}
+        .reviews ul { padding: 0; margin: 0; list-style: none;}
+        .reviews li { color: var(--text-main); font-size: 0.9rem; background: #f8fafc; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #f1f5f9;}
+        .review-form { display: flex; gap: 8px; margin-top: 12px;}
+        .review-form input { flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: border-color 0.2s;}
+        .review-form input:focus { outline: none; border-color: var(--primary); }
+        .review-form button { background: var(--text-main); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;}
+        .review-form button:hover { background: #334155;}
+        
+        .add-btn { position: fixed; bottom: 40px; right: 40px; background: var(--primary); color: #fff; border: none; border-radius: 50%; width: 64px; height: 64px; font-size: 2rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; z-index: 10; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
+        .add-btn:hover { background: var(--primary-hover); transform: scale(1.05);}
+        
         /* Modal styles */
-        .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; z-index: 100;}
-        .modal { background: #fff; padding: 32px 28px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); min-width: 320px; max-width: 95vw;}
-        .modal h2 { margin-top: 0; color: #00a680;}
-        .modal form { display: flex; flex-direction: column; gap: 14px;}
-        .modal input { padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0;}
-        .modal button { background: #00a680; color: #fff; border: none; padding: 10px 0; border-radius: 8px; cursor: pointer; font-size: 1.1rem;}
-        .modal button:hover { background: #008060;}
-        .close-modal { position: absolute; top: 18px; right: 22px; font-size: 1.5rem; color: #888; cursor: pointer;}
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #00a680; color: #fff; padding: 14px 32px; border-radius: 8px; font-size: 1.1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.13); z-index: 200; animation: fadeIn 0.3s;}
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.2s;}
+        .modal { background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 450px; position: relative;}
+        .modal h2 { margin-top: 0; color: var(--text-main); font-size: 1.8rem; margin-bottom: 24px;}
+        .modal form { display: flex; flex-direction: column; gap: 16px;}
+        .modal input { padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: 'Inter', sans-serif; font-size: 1rem; transition: border-color 0.2s;}
+        .modal input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);}
+        .modal button { background: var(--primary); color: #fff; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 1.1rem; font-weight: 600; transition: background 0.2s; margin-top: 8px;}
+        .modal button:hover { background: var(--primary-hover);}
+        .close-modal { position: absolute; top: 20px; right: 24px; font-size: 2rem; color: #94a3b8; cursor: pointer; transition: color 0.2s; line-height: 1;}
+        .close-modal:hover { color: var(--text-main);}
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @media (max-width: 700px) {
-            .container { padding: 10px; }
-            .location-list { grid-template-columns: 1fr; }
-            .add-btn { right: 18px; bottom: 18px;}
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 16px; padding: 20px;}
+            .header-left { flex-direction: column; gap: 12px; }
+            .add-btn { right: 20px; bottom: 20px;}
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
@@ -80,14 +100,16 @@
 </head>
 <body>
     <header ng-controller="AuthController">
-        <h1>TripAdvisor Clone</h1>
-        <nav>
-            <a href="#!/listings">Listings</a> |
-            <a href="#!/about">About</a>
-        </nav>
-        <div class="auth-section" style="margin-top: 15px;">
-            <span ng-if="user" style="margin-right: 15px; font-weight: bold;">Welcome, {{user.displayName}}</span>
-            <button ng-if="user" ng-click="logout()" style="padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #e74c3c; color: white; border: none; font-weight: bold;">Sign Out</button>
+        <div class="header-left">
+            <h1>TripAdvisor</h1>
+            <nav>
+                <a href="#!/listings">Listings</a>
+                <a href="#!/about" style="margin-left: 20px;">About</a>
+            </nav>
+        </div>
+        <div class="auth-section">
+            <span ng-if="user" style="margin-right: 15px; font-weight: 500;">{{user.displayName}}</span>
+            <button ng-if="user" ng-click="logout()" class="btn-secondary">Sign Out</button>
         </div>
     </header>
     <div class="container">

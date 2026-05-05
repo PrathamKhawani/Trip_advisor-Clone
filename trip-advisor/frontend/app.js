@@ -35,6 +35,10 @@ app.config(function($routeProvider) {
         .when('/listings', {
             template: `
                 <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h2 style="margin: 0; font-size: 2rem; color: #0f172a;">Top Destinations</h2>
+                        <button class="btn-secondary" ng-click="seedData()" ng-if="user" style="font-size: 0.9rem;">Seed Default Data</button>
+                    </div>
                     <button class="add-btn" ng-click="showAddModal=true" title="Add Destination" ng-if="user">+</button>
                     <div ng-show="showAddModal" class="modal-bg">
                         <div class="modal" style="position:relative;">
@@ -44,13 +48,15 @@ app.config(function($routeProvider) {
                                 <input type="text" ng-model="newLocation.name" placeholder="Destination Name" required>
                                 <input type="text" ng-model="newLocation.description" placeholder="Description" required>
                                 <input type="text" ng-model="newLocation.image" placeholder="Image URL (optional)">
-                                <button type="submit">Add</button>
+                                <button type="submit">Add Location</button>
                             </form>
                         </div>
                     </div>
                     <div class="location-list">
                         <div class="location-card" ng-repeat="location in locations">
-                            <img ng-if="location.image" ng-src="{{location.image}}" alt="{{location.name}}">
+                            <div class="card-image-wrapper">
+                                <img ng-if="location.image" ng-src="{{location.image}}" alt="{{location.name}}">
+                            </div>
                             <div class="location-card-content">
                                 <h3>{{location.name}}</h3>
                                 <p>{{location.description}}</p>
@@ -154,23 +160,58 @@ app.controller('ListingsController', function($scope, $timeout) {
                     {
                         name: "Eiffel Tower",
                         description: "A famous wrought-iron lattice tower on the Champ de Mars in Paris, France.",
-                        image: "https://upload.wikimedia.org/wikipedia/commons/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
+                        image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80",
                         rating: 5,
                         reviews: ["Absolutely breathtaking view from the top!"]
                     },
                     {
                         name: "Colosseum",
                         description: "An oval amphitheatre in the centre of the city of Rome, Italy. A marvel of ancient engineering.",
-                        image: "https://upload.wikimedia.org/wikipedia/commons/d/d8/Colosseum_in_Rome-April_2007-1-_copie_2B.jpg",
+                        image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80",
                         rating: 4,
                         reviews: ["Incredible piece of history."]
                     },
                     {
                         name: "Santorini",
-                        description: "An island in the southern Aegean Sea, southeast of Greece's mainland.",
+                        description: "An island in the southern Aegean Sea, famous for its dramatic views and stunning sunsets.",
                         image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80",
                         rating: 5,
                         reviews: ["The sunsets here are unmatched."]
+                    },
+                    {
+                        name: "Kyoto",
+                        description: "Once the capital of Japan, Kyoto is famous for its numerous classical Buddhist temples, gardens, and imperial palaces.",
+                        image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+                        rating: 5,
+                        reviews: ["So peaceful and culturally rich."]
+                    },
+                    {
+                        name: "New York City",
+                        description: "The global center of art, culture, fashion, and finance, home to the iconic Times Square and Statue of Liberty.",
+                        image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80",
+                        rating: 4,
+                        reviews: ["The city that never sleeps!"]
+                    },
+                    {
+                        name: "Bali",
+                        description: "An Indonesian island known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.",
+                        image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+                        rating: 5,
+                        reviews: ["A true tropical paradise."]
+                    },
+                    {
+                        name: "Machu Picchu",
+                        description: "A 15th-century Inca citadel set high in the Andes Mountains in Peru, above the Urubamba River valley.",
+                        image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80",
+                        rating: 5,
+                        reviews: ["The hike was challenging but worth every step."]
+                    },
+                    {
+                        name: "Banff National Park",
+                        description: "Canada's oldest national park, encompassing 6,641 square kilometres of mountainous terrain, glaciers and ice fields.",
+                        image: "https://images.unsplash.com/photo-1534067783941-51c9c2a8dc4e?auto=format&fit=crop&w=800&q=80",
+                        rating: 5,
+                        reviews: ["The bluest water I've ever seen."]
                     }
                 ];
                 
@@ -205,6 +246,29 @@ app.controller('ListingsController', function($scope, $timeout) {
         });
     }
     loadLocations();
+
+    // Seed Data Function for the UI button
+    $scope.seedData = function() {
+        if (!confirm("This will overwrite your current destinations with the 8 high-quality default locations. Proceed?")) return;
+        
+        firebase.database().ref('listings').remove().then(() => {
+            const defaultListings = [
+                { name: "Eiffel Tower", description: "A famous wrought-iron lattice tower on the Champ de Mars in Paris, France.", image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["Absolutely breathtaking view from the top!"] },
+                { name: "Colosseum", description: "An oval amphitheatre in the centre of the city of Rome, Italy. A marvel of ancient engineering.", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["Incredible piece of history."] },
+                { name: "Santorini", description: "An island in the southern Aegean Sea, famous for its dramatic views and stunning sunsets.", image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The sunsets here are unmatched."] },
+                { name: "Kyoto", description: "Once the capital of Japan, Kyoto is famous for its numerous classical Buddhist temples, gardens, and imperial palaces.", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["So peaceful and culturally rich."] },
+                { name: "New York City", description: "The global center of art, culture, fashion, and finance, home to the iconic Times Square and Statue of Liberty.", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80", rating: 4, reviews: ["The city that never sleeps!"] },
+                { name: "Bali", description: "An Indonesian island known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["A true tropical paradise."] },
+                { name: "Machu Picchu", description: "A 15th-century Inca citadel set high in the Andes Mountains in Peru, above the Urubamba River valley.", image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The hike was challenging but worth every step."] },
+                { name: "Banff National Park", description: "Canada's oldest national park, encompassing 6,641 square kilometres of mountainous terrain, glaciers and ice fields.", image: "https://images.unsplash.com/photo-1534067783941-51c9c2a8dc4e?auto=format&fit=crop&w=800&q=80", rating: 5, reviews: ["The bluest water I've ever seen."] }
+            ];
+            
+            defaultListings.forEach(item => {
+                firebase.database().ref('listings').push(item);
+            });
+            $timeout(loadLocations, 1500);
+        }).catch(err => alert("Error writing to database: " + err.message));
+    };
 
     // Add a new listing
     $scope.addLocation = function() {
