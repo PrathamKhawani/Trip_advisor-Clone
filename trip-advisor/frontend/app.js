@@ -51,6 +51,18 @@ app.config(function($routeProvider) {
                             </form>
                         </div>
                     </div>
+                    <div ng-show="showEditModal" class="modal-bg">
+                        <div class="modal" style="position:relative;">
+                            <span class="close-modal" ng-click="closeEditModal()">&times;</span>
+                            <h2>Edit Destination</h2>
+                            <form ng-submit="saveEdit()">
+                                <input type="text" ng-model="editingLocation.name" placeholder="Destination Name" required>
+                                <input type="text" ng-model="editingLocation.description" placeholder="Description" required>
+                                <input type="text" ng-model="editingLocation.image" placeholder="Image URL (optional)">
+                                <button type="submit">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
                     <div class="location-list">
                         <div class="location-card" ng-repeat="location in locations">
                             <div class="card-image-wrapper">
@@ -59,7 +71,10 @@ app.config(function($routeProvider) {
                             <div class="location-card-content">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <h3 style="margin: 0;">{{location.name}}</h3>
-                                    <button ng-if="user" ng-click="deleteLocation(location)" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0 0 0 10px; line-height: 1;" title="Delete Destination">&times;</button>
+                                    <div ng-if="user" style="display: flex; gap: 8px;">
+                                        <button ng-click="openEditModal(location)" style="background: none; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1;" title="Edit Destination">&#9998;</button>
+                                        <button ng-click="deleteLocation(location)" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;" title="Delete Destination">&times;</button>
+                                    </div>
                                 </div>
                                 <p>{{location.description}}</p>
                                 <div class="stars">
@@ -150,13 +165,25 @@ app.controller('LoginController', function($scope, $rootScope) {
 app.controller('ListingsController', function($scope, $timeout) {
     $scope.locations = [];
     $scope.newLocation = {};
+    $scope.editingLocation = {};
     $scope.showAddModal = false;
+    $scope.showEditModal = false;
 
     $scope.openAddModal = function() {
         $scope.showAddModal = true;
     };
     $scope.closeAddModal = function() {
         $scope.showAddModal = false;
+    };
+
+    $scope.openEditModal = function(location) {
+        $scope.editingLocation = angular.copy(location);
+        $scope.originalLocation = location;
+        $scope.showEditModal = true;
+    };
+    $scope.closeEditModal = function() {
+        $scope.showEditModal = false;
+        $scope.editingLocation = {};
     };
 
     function loadLocations() {
@@ -274,6 +301,27 @@ app.controller('ListingsController', function($scope, $timeout) {
         if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
             firebase.database().ref('listings/' + location.id).remove()
                 .catch(err => console.warn("Firebase delete blocked, but UI updated successfully."));
+        }
+    };
+
+    // Save edited location (Optimistic UI update)
+    $scope.saveEdit = function() {
+        const updatedObj = {
+            name: $scope.editingLocation.name,
+            description: $scope.editingLocation.description,
+            image: $scope.editingLocation.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png',
+            rating: $scope.editingLocation.rating || 0,
+            reviews: $scope.editingLocation.reviews || []
+        };
+
+        // 1. Instantly update UI
+        Object.assign($scope.originalLocation, updatedObj);
+        $scope.showEditModal = false;
+
+        // 2. Silently sync with Firebase
+        if (!$scope.editingLocation.id.startsWith('default_') && !$scope.editingLocation.id.startsWith('local_')) {
+            firebase.database().ref('listings/' + $scope.editingLocation.id).update(updatedObj)
+                .catch(err => console.warn("Firebase update blocked, but UI updated successfully."));
         }
     };
 });
