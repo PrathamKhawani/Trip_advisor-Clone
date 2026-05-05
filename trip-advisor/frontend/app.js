@@ -162,7 +162,15 @@ app.controller('LoginController', function($scope, $rootScope) {
     };
 });
 
-app.controller('ListingsController', function($scope, $timeout) {
+app.controller('ListingsController', function($scope, $timeout, $rootScope) {
+    const getHiddenItems = () => JSON.parse(localStorage.getItem('trip_hidden_items') || '[]');
+    const saveHiddenItem = (id) => {
+        const hidden = getHiddenItems();
+        if (!hidden.includes(id)) {
+            hidden.push(id);
+            localStorage.setItem('trip_hidden_items', JSON.stringify(hidden));
+        }
+    };
     $scope.locations = [];
     $scope.newLocation = {};
     $scope.editingLocation = {};
@@ -217,7 +225,10 @@ app.controller('ListingsController', function($scope, $timeout) {
                     });
                 }
             } else {
-                $scope.locations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                const hidden = getHiddenItems();
+                $scope.locations = Object.keys(data)
+                    .map(key => ({ id: key, ...data[key] }))
+                    .filter(item => !hidden.includes(item.id));
                 $scope.$applyAsync();
             }
         }).catch(function(error) {
@@ -285,7 +296,7 @@ app.controller('ListingsController', function($scope, $timeout) {
         }
     };
 
-    // Delete location (Optimistic UI update)
+    // Delete location (Optimistic UI update + LocalStorage fallback)
     $scope.deleteLocation = function(location) {
         if (!confirm("Are you sure you want to delete this destination?")) return;
 
@@ -295,10 +306,16 @@ app.controller('ListingsController', function($scope, $timeout) {
             $scope.locations.splice(index, 1);
         }
 
-        // 2. Silently sync with Firebase
+        // 2. Persistent hidden state (Fallback if Firebase fails)
+        saveHiddenItem(location.id);
+
+        // 3. Silently sync with Firebase
         if (!location.id.startsWith('default_') && !location.id.startsWith('local_')) {
             firebase.database().ref('listings/' + location.id).remove()
-                .catch(err => console.warn("Firebase delete blocked, but UI updated successfully."));
+                .catch(err => {
+                    console.error("Firebase delete failed. Item hidden via localStorage.", err);
+                    alert("Note: Your Firebase Database rules are currently blocking deletions. I've hidden it locally for you, but you should update your rules to '.write': 'auth != null' in the Firebase Console.");
+                });
         }
     };
 
