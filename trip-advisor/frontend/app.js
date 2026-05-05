@@ -215,7 +215,10 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
             // Only seed if the database is COMPLETELY empty
             if (dataCount === 0) {
                 // Instantly display the default listings so the UI is never empty!
-                $scope.locations = defaultListings.map((item, index) => ({ id: 'default_' + index, ...item }));
+                const hidden = getHiddenItems();
+                $scope.locations = defaultListings
+                    .map((item, index) => ({ id: 'default_' + index, ...item }))
+                    .filter(item => !hidden.includes(item.id));
                 $scope.$applyAsync();
                 
                 // Attempt to update the database in the background if the user has write permissions
