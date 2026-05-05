@@ -163,14 +163,14 @@ app.controller('LoginController', function($scope, $rootScope) {
 });
 
 app.controller('ListingsController', function($scope, $timeout, $rootScope) {
-    const getHiddenItems = () => JSON.parse(localStorage.getItem('trip_hidden_items') || '[]');
+    const getHiddenItems = () => JSON.parse(localStorage.getItem('trip_hidden_items_v2') || '[]');
     const saveHiddenItem = (item) => {
         const hidden = getHiddenItems();
-        // Use the item's ID or name as a unique key for the hidden list
-        const key = item.id || item.name; 
-        if (!hidden.includes(key)) {
-            hidden.push(key);
-            localStorage.setItem('trip_hidden_items', JSON.stringify(hidden));
+        // Normalize name for robust matching
+        const nameKey = item.name.toLowerCase().trim();
+        if (!hidden.includes(nameKey)) {
+            hidden.push(nameKey);
+            localStorage.setItem('trip_hidden_items_v2', JSON.stringify(hidden));
         }
     };
     $scope.locations = [];
@@ -220,7 +220,10 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
                 const hidden = getHiddenItems();
                 $scope.locations = defaultListings
                     .map((item, index) => ({ id: 'default_' + index, ...item }))
-                    .filter(item => !hidden.includes(item.id) && !hidden.includes(item.name));
+                    .filter(item => {
+                        const nameKey = item.name.toLowerCase().trim();
+                        return !hidden.includes(nameKey);
+                    });
                 $scope.$applyAsync();
                 
                 if ($rootScope.user) {
@@ -230,7 +233,10 @@ app.controller('ListingsController', function($scope, $timeout, $rootScope) {
                 const hidden = getHiddenItems();
                 $scope.locations = Object.keys(data)
                     .map(key => ({ id: key, ...data[key] }))
-                    .filter(item => !hidden.includes(item.id) && !hidden.includes(item.name));
+                    .filter(item => {
+                        const nameKey = item.name.toLowerCase().trim();
+                        return !hidden.includes(nameKey);
+                    });
                 $scope.$applyAsync();
             }
         }).catch(function(error) {
